@@ -13,7 +13,7 @@ export const SocketProvider = ({ children }) => {
     if (!user) return;
 
     // Connect socket
-    const newSocket = io("http://localhost:8000");
+    const newSocket = io("https://gig-flow-application.vercel.app/");
     setSocket(newSocket);
 
     // Join room = user.id
