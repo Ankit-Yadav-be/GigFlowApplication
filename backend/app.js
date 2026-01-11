@@ -9,10 +9,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: "gig-flow-application-kw51.vercel.app",
+    origin: [
+      "https://gig-flow-application-kw51.vercel.app"
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
+// VERY IMPORTANT
+app.options("*", cors());
 
 app.use(express.json());
 app.get("/", (req, res) => {

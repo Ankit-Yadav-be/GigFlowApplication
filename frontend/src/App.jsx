@@ -5,7 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/DashBoard";
 import CreateGig from "./pages/CreateGig";
 import GigDetail from "./pages/GigDetail";
-import ProtectedRoute from "./componnets/ProtectedRoutes"; 
+import ProtectedRoute from "./componnets/ProtectedRoutes";
 
 const AppRoutes = () => {
   return (

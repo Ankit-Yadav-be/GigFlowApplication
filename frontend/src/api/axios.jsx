@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://gig-flow-application.vercel.app/api"
+  baseURL: "https://gig-flow-application.vercel.app/api",
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
