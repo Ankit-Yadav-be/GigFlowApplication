@@ -15,6 +15,9 @@ app.use(
 );
 
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.send(" LocalConnect API is running...");
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/gigs", gigRoutes);
