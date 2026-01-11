@@ -1,0 +1,24 @@
+import express from "express";
+import cors from "cors";
+
+import authRoutes from "./src/routes/authRoutes.js";
+import gigRoutes from "./src/routes/gigRoutes.js";
+import bidRoutes from "./src/routes/bidRoutes.js";
+import notificationRoutes from "./src/routes/notificationRoutes.js";
+const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/gigs", gigRoutes);
+app.use("/api/bids", bidRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+export default app;
