@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "gig-flow-application-kw51.vercel.app",
     credentials: true,
   })
 );
