@@ -5,8 +5,9 @@ let io;
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "gig-flow-application-kw51.vercel.app", // dev environment; production me specific frontend URL use karo
-      methods: ["GET", "POST"],
+      origin: "https://gig-flow-application-kw51.vercel.app", // dev environment; production me specific frontend URL use karo
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     },
   });
