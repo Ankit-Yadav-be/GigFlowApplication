@@ -37,23 +37,13 @@ export const hireBid = async (req, res) => {
 
     /* ---- Fetch bid ---- */
     const bid = await Bid.findById(req.params.bidId).session(session);
-    if (!bid) {
-      throw new Error("Bid not found");
-    }
-
-    if (!bid.userId) {
-      throw new Error("Bid user missing");
-    }
+    if (!bid) throw new Error("Bid not found");
+    if (!bid.userId) throw new Error("Bid user missing");
 
     /* ---- Fetch gig ---- */
     const gig = await Gig.findById(bid.gigId).session(session);
-    if (!gig) {
-      throw new Error("Gig not found");
-    }
-
-    if (gig.status === "assigned") {
-      throw new Error("Gig already assigned");
-    }
+    if (!gig) throw new Error("Gig not found");
+    if (gig.status === "assigned") throw new Error("Gig already assigned");
 
     /* ---- Authorization ---- */
     if (gig.ownerId.toString() !== req.user._id.toString()) {
@@ -82,10 +72,10 @@ export const hireBid = async (req, res) => {
       createdAt: new Date(),
     };
 
-    // realtime socket
+    // 🔹 Emit realtime socket notification
     io.to(bid.userId.toString()).emit("notification", notificationData);
 
-    // persistent notification
+    // 🔹 Persist notification to DB
     await Notification.create({
       userId: bid.userId,
       ...notificationData,
@@ -98,9 +88,8 @@ export const hireBid = async (req, res) => {
     });
 
   } catch (error) {
-    if (session.inTransaction()) {
-      await session.abortTransaction();
-    }
+    // ❗ Only abort if transaction is active
+    if (session.inTransaction()) await session.abortTransaction();
     session.endSession();
 
     console.error("HireBid Error:", error.message);
