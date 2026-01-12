@@ -4,31 +4,48 @@ import Gig from "../models/gigModal.js";
 import { getIO } from "../config/socket.js";
 import Notification from "../models/notificationModal.js";
 
+/* ---------------- CREATE BID ---------------- */
 export const createBid = async (req, res) => {
-  const bid = await Bid.create({
-    ...req.body,
-    freelancerId: req.user._id,
-  });
-  res.status(201).json(bid);
+  try {
+    const bid = await Bid.create({
+      ...req.body,
+      userId: req.user._id, // 🔥 ensure consistency
+    });
+
+    res.status(201).json(bid);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
+/* ---------------- GET BIDS BY GIG ---------------- */
 export const getBidsByGig = async (req, res) => {
-  const bids = await Bid.find({ gigId: req.params.gigId });
-  res.json(bids);
+  try {
+    const bids = await Bid.find({ gigId: req.params.gigId });
+    res.json(bids);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-//  ATOMIC HIRE LOGIC
+/* ---------------- HIRE BID (ATOMIC) ---------------- */
 export const hireBid = async (req, res) => {
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
 
+    /* ---- Fetch bid ---- */
     const bid = await Bid.findById(req.params.bidId).session(session);
     if (!bid) {
       throw new Error("Bid not found");
     }
 
+    if (!bid.userId) {
+      throw new Error("Bid user missing");
+    }
+
+    /* ---- Fetch gig ---- */
     const gig = await Gig.findById(bid.gigId).session(session);
     if (!gig) {
       throw new Error("Gig not found");
@@ -38,7 +55,12 @@ export const hireBid = async (req, res) => {
       throw new Error("Gig already assigned");
     }
 
-    // DB updates
+    /* ---- Authorization ---- */
+    if (gig.ownerId.toString() !== req.user._id.toString()) {
+      throw new Error("Not authorized to hire this bid");
+    }
+
+    /* ---- DB Updates ---- */
     gig.status = "assigned";
     gig.assignedTo = bid.userId;
     await gig.save({ session });
@@ -46,16 +68,27 @@ export const hireBid = async (req, res) => {
     bid.status = "hired";
     await bid.save({ session });
 
-    // ✅ COMMIT FIRST
+    /* ---- Commit transaction FIRST ---- */
     await session.commitTransaction();
     session.endSession();
 
-    // 🔥 NON-DB WORK AFTER COMMIT
+    /* ---- SOCKET + NOTIFICATION (AFTER COMMIT) ---- */
     const io = getIO();
-    io.to(bid.userId.toString()).emit("notification", {
+
+    const notificationData = {
       type: "BID_HIRED",
       message: "🎉 Your bid has been hired!",
       gigId: gig._id,
+      createdAt: new Date(),
+    };
+
+    // realtime socket
+    io.to(bid.userId.toString()).emit("notification", notificationData);
+
+    // persistent notification
+    await Notification.create({
+      userId: bid.userId,
+      ...notificationData,
     });
 
     return res.status(200).json({
@@ -65,7 +98,6 @@ export const hireBid = async (req, res) => {
     });
 
   } catch (error) {
-    // ❗ abort ONLY if transaction is active
     if (session.inTransaction()) {
       await session.abortTransaction();
     }

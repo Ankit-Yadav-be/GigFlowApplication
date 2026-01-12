@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
 
     const newSocket = io("https://gigflowapplication.onrender.com", {
       path: "/socket.io",
-      transports: ["polling", "websocket"], //  IMPORTANT
+      transports: ["polling", "websocket"],
       withCredentials: true,
       reconnection: true,
       reconnectionAttempts: 5,
@@ -25,7 +25,12 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on("connect", () => {
       console.log("🟢 Socket connected (frontend):", newSocket.id);
-      newSocket.emit("join", user.id);
+      if (user?.id) newSocket.emit("join", user.id);
+    });
+
+    newSocket.on("reconnect", () => {
+      console.log("♻️ Socket reconnected (frontend):", newSocket.id);
+      if (user?.id) newSocket.emit("join", user.id);
     });
 
     newSocket.on("notification", (data) => {
@@ -36,6 +41,10 @@ export const SocketProvider = ({ children }) => {
       console.log("🔴 Socket disconnected (frontend)");
     });
 
+    newSocket.on("connect_error", (err) => {
+      console.error("Socket connection error (frontend):", err.message);
+    });
+
     return () => {
       newSocket.disconnect();
       setSocket(null);
@@ -44,9 +53,7 @@ export const SocketProvider = ({ children }) => {
 
   const markAsRead = (id) => {
     setNotifications((prev) =>
-      prev.map((n) =>
-        n._id === id ? { ...n, isRead: true } : n
-      )
+      prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
     );
   };
 
