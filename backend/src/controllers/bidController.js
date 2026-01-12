@@ -9,11 +9,12 @@ export const createBid = async (req, res) => {
   try {
     const bid = await Bid.create({
       ...req.body,
-      freelancerId: req.user._id, // 🔹 Use freelancerId instead of userId
+      freelancerId: req.user._id, // 🔹 Use freelancerId
     });
 
     res.status(201).json(bid);
   } catch (error) {
+    console.error("CreateBid Error:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -24,6 +25,7 @@ export const getBidsByGig = async (req, res) => {
     const bids = await Bid.find({ gigId: req.params.gigId });
     res.json(bids);
   } catch (error) {
+    console.error("GetBidsByGig Error:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -66,18 +68,18 @@ export const hireBid = async (req, res) => {
     const io = getIO();
 
     const notificationData = {
-      type: "BID_HIRED",
+      type: "HIRED", // 🔹 Must match enum in Notification model
       message: "🎉 Your bid has been hired!",
-      gigId: gig._id,
+      gig: gig._id,  // 🔹 Field matches Notification schema
       createdAt: new Date(),
     };
 
-    // 🔹 Emit realtime socket notification
+    // 🔹 Emit realtime notification to online user
     io.to(bid.freelancerId.toString()).emit("notification", notificationData);
 
-    // 🔹 Persist notification to DB
+    // 🔹 Persist notification to DB for offline users
     await Notification.create({
-      userId: bid.freelancerId,
+      user: bid.freelancerId,
       ...notificationData,
     });
 
@@ -86,7 +88,6 @@ export const hireBid = async (req, res) => {
       gig,
       bid,
     });
-
   } catch (error) {
     if (session.inTransaction()) await session.abortTransaction();
     session.endSession();

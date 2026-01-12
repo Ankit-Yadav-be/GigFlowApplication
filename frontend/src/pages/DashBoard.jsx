@@ -8,12 +8,12 @@ import { FiBell, FiSearch, FiLogOut, FiPlus } from "react-icons/fi";
 
 const Dashboard = () => {
   const [gigs, setGigs] = useState([]);
-  const [filter, setFilter] = useState("all"); // "all" or "my"
+  const [filter, setFilter] = useState("all"); 
   const [search, setSearch] = useState("");
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const { socket, notifications, markAsRead } = useContext(SocketContext);
+  const { socket, notifications, setNotifications, markAsRead } = useContext(SocketContext);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -32,11 +32,18 @@ const Dashboard = () => {
     fetchGigs();
   }, [search]);
 
+  // Handle incoming realtime notifications
   useEffect(() => {
     if (!socket) return;
-    socket.on("notification", (n) => alert(`Notification: ${n.message}`));
-    return () => socket.off("notification");
-  }, [socket]);
+
+    const handleNotification = (n) => {
+      setNotifications((prev) => [n, ...prev]);
+    };
+
+    socket.on("notification", handleNotification);
+
+    return () => socket.off("notification", handleNotification);
+  }, [socket, setNotifications]);
 
   // Always dark mode
   useEffect(() => {
@@ -96,25 +103,23 @@ const Dashboard = () => {
                     No notifications
                   </p>
                 ) : (
-                  notifications.map((n) => (
-                    <div
-                      key={n._id}
-                      className={`p-3 mb-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-700 ${!n.isRead
-                          ? "bg-gray-700 border-l-4 border-green-400"
-                          : ""
-                        }`}
-                      onClick={async () => {
-                        markAsRead(n._id);
-                        await api.patch(`/notifications/${n._id}/read`);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      <p className="text-sm">{n.message}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(n.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  ))
+                  notifications
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .map((n) => (
+                      <div
+                        key={n._id}
+                        className={`p-3 mb-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-700 ${!n.isRead
+                            ? "bg-gray-700 border-l-4 border-green-400"
+                            : ""
+                          }`}
+                        onClick={() => markAsRead(n._id)}
+                      >
+                        <p className="text-sm">{n.message}</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(n.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
                 )}
               </div>
             )}
