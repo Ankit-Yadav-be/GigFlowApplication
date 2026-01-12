@@ -6,8 +6,9 @@ const router = express.Router();
 
 // get all notifications for logged-in user
 router.get("/", protect, async (req, res) => {
-  const notifications = await Notification.find({ user: req.user._id })
-    .sort({ createdAt: -1 });
+  const notifications = await Notification.find({ user: req.user._id }).sort({
+    createdAt: -1,
+  });
   res.json(notifications);
 });
 

@@ -99,11 +99,10 @@ const Dashboard = () => {
                   notifications.map((n) => (
                     <div
                       key={n._id}
-                      className={`p-3 mb-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-700 ${
-                        !n.isRead
+                      className={`p-3 mb-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-700 ${!n.isRead
                           ? "bg-gray-700 border-l-4 border-green-400"
                           : ""
-                      }`}
+                        }`}
                       onClick={async () => {
                         markAsRead(n._id);
                         await api.patch(`/notifications/${n._id}/read`);
@@ -136,21 +135,19 @@ const Dashboard = () => {
       <div className="flex justify-center gap-4 p-6">
         <button
           onClick={() => setFilter("all")}
-          className={`px-6 py-2 rounded-2xl font-semibold transition ${
-            filter === "all"
+          className={`px-6 py-2 rounded-2xl font-semibold transition ${filter === "all"
               ? "bg-green-500 text-white shadow-lg"
               : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
+            }`}
         >
           All Gigs
         </button>
         <button
           onClick={() => setFilter("my")}
-          className={`px-6 py-2 rounded-2xl font-semibold transition ${
-            filter === "my"
+          className={`px-6 py-2 rounded-2xl font-semibold transition ${filter === "my"
               ? "bg-green-500 text-white shadow-lg"
               : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
+            }`}
         >
           My Gigs
         </button>
