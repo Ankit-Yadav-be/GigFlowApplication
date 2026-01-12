@@ -13,7 +13,10 @@ export const SocketProvider = ({ children }) => {
     if (!user) return;
 
     // Connect socket
-    const newSocket = io("https://gig-flow-application.vercel.app");
+    const newSocket = io("https://gigflowapplication.onrender.com/", {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
     setSocket(newSocket);
 
     // Join room = user.id
@@ -21,7 +24,7 @@ export const SocketProvider = ({ children }) => {
 
     // Listen for notifications
     newSocket.on("notification", (data) => {
-      setNotifications((prev) => [data, ...prev]); 
+      setNotifications((prev) => [data, ...prev]);
     });
 
     return () => {
