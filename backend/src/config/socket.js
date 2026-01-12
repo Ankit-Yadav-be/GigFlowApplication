@@ -3,14 +3,17 @@ import { Server } from "socket.io";
 let io;
 
 export const initSocket = (server) => {
-  io = new Server(server, {
-    cors: {
-      origin: "https://gig-flow-application-kw51.vercel.app", // dev environment; production me specific frontend URL use karo
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
-    },
-  });
+ io = new Server(server, {
+  cors: {
+    origin: [
+      "https://gig-flow-application-kw51.vercel.app",
+      "http://localhost:5173"
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  },
+});
+
 
   io.on("connection", (socket) => {
     console.log("New socket connected:", socket.id);
