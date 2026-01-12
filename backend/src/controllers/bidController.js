@@ -9,7 +9,7 @@ export const createBid = async (req, res) => {
   try {
     const bid = await Bid.create({
       ...req.body,
-      userId: req.user._id, // 🔥 ensure consistency
+      freelancerId: req.user._id, // 🔹 Use freelancerId instead of userId
     });
 
     res.status(201).json(bid);
@@ -38,7 +38,7 @@ export const hireBid = async (req, res) => {
     /* ---- Fetch bid ---- */
     const bid = await Bid.findById(req.params.bidId).session(session);
     if (!bid) throw new Error("Bid not found");
-    if (!bid.userId) throw new Error("Bid user missing");
+    if (!bid.freelancerId) throw new Error("Bid freelancer missing");
 
     /* ---- Fetch gig ---- */
     const gig = await Gig.findById(bid.gigId).session(session);
@@ -52,7 +52,7 @@ export const hireBid = async (req, res) => {
 
     /* ---- DB Updates ---- */
     gig.status = "assigned";
-    gig.assignedTo = bid.userId;
+    gig.assignedTo = bid.freelancerId;
     await gig.save({ session });
 
     bid.status = "hired";
@@ -73,11 +73,11 @@ export const hireBid = async (req, res) => {
     };
 
     // 🔹 Emit realtime socket notification
-    io.to(bid.userId.toString()).emit("notification", notificationData);
+    io.to(bid.freelancerId.toString()).emit("notification", notificationData);
 
     // 🔹 Persist notification to DB
     await Notification.create({
-      userId: bid.userId,
+      userId: bid.freelancerId,
       ...notificationData,
     });
 
@@ -88,7 +88,6 @@ export const hireBid = async (req, res) => {
     });
 
   } catch (error) {
-    // ❗ Only abort if transaction is active
     if (session.inTransaction()) await session.abortTransaction();
     session.endSession();
 
