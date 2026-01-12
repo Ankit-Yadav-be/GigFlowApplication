@@ -12,19 +12,28 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Connect socket
-    const newSocket = io("https://gigflowapplication.onrender.com/", {
-      transports: ["websocket"],
+    const newSocket = io("https://gigflowapplication.onrender.com", {
+      path: "/socket.io",
+      transports: ["polling", "websocket"], //  IMPORTANT
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
+
     setSocket(newSocket);
 
-    // Join room = user.id
-    newSocket.emit("join", user.id);
+    newSocket.on("connect", () => {
+      console.log("🟢 Socket connected (frontend):", newSocket.id);
+      newSocket.emit("join", user.id);
+    });
 
-    // Listen for notifications
     newSocket.on("notification", (data) => {
       setNotifications((prev) => [data, ...prev]);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("🔴 Socket disconnected (frontend)");
     });
 
     return () => {
@@ -35,7 +44,9 @@ export const SocketProvider = ({ children }) => {
 
   const markAsRead = (id) => {
     setNotifications((prev) =>
-      prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+      prev.map((n) =>
+        n._id === id ? { ...n, isRead: true } : n
+      )
     );
   };
 
