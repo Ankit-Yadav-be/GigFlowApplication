@@ -5,7 +5,10 @@ import authRoutes from "./src/routes/authRoutes.js";
 import gigRoutes from "./src/routes/gigRoutes.js";
 import bidRoutes from "./src/routes/bidRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
+import connectDB from "./src/config/db.js";
 const app = express();
+
+connectDB();
 
 app.use(
   cors({

@@ -29,7 +29,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-100 px-6">
       <div className="flex flex-col lg:flex-row w-full max-w-6xl bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
-        
+
         {/* LEFT IMAGE SECTION */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-gray-900">
           <img
