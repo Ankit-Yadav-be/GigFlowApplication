@@ -9,37 +9,23 @@ import notificationRoutes from "./src/routes/notificationRoutes.js";
 
 const app = express();
 
-/* ✅ CONNECT DB */
+/* DB */
 connectDB();
 
-/* ✅ CORS CONFIG */
-const allowedOrigins = [
-  "https://gig-flow-application-kw51.vercel.app",
-  "http://localhost:5173"
-];
-
+/* CORS */
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: [
+      "https://gig-flow-application-kw51.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/* ✅ VERY IMPORTANT (preflight fix) */
-app.options("*", cors());
-
-/* MIDDLEWARE */
+/* IMPORTANT */
 app.use(express.json());
 
 /* ROUTES */
