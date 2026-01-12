@@ -20,51 +20,58 @@ export const getBidsByGig = async (req, res) => {
 //  ATOMIC HIRE LOGIC
 export const hireBid = async (req, res) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
+    session.startTransaction();
+
     const bid = await Bid.findById(req.params.bidId).session(session);
-    if (!bid) throw new Error("Bid not found");
+    if (!bid) {
+      throw new Error("Bid not found");
+    }
 
-    const gig = await Gig.findOne({
-      _id: bid.gigId,
-      ownerId: req.user._id,
-      status: "open",
-    }).session(session);
+    const gig = await Gig.findById(bid.gigId).session(session);
+    if (!gig) {
+      throw new Error("Gig not found");
+    }
 
-    if (!gig) throw new Error("Gig already assigned");
+    if (gig.status === "assigned") {
+      throw new Error("Gig already assigned");
+    }
 
-    // reject other bids
-    await Bid.updateMany(
-      { gigId: gig._id },
-      { status: "rejected" },
-      { session }
-    );
+    // DB updates
+    gig.status = "assigned";
+    gig.assignedTo = bid.userId;
+    await gig.save({ session });
 
     bid.status = "hired";
     await bid.save({ session });
 
-    gig.status = "assigned";
-    await gig.save({ session });
+    // ✅ COMMIT FIRST
+    await session.commitTransaction();
+    session.endSession();
 
-    //  Create notification
-    const notification = await Notification.create({
-      user: bid.freelancerId,
-      type: "HIRED",
-      message: `You have been hired for ${gig.title}`,
-      gig: gig._id,
+    // 🔥 NON-DB WORK AFTER COMMIT
+    const io = getIO();
+    io.to(bid.userId.toString()).emit("notification", {
+      type: "BID_HIRED",
+      message: "🎉 Your bid has been hired!",
+      gigId: gig._id,
     });
 
-    await session.commitTransaction();
+    return res.status(200).json({
+      message: "Bid hired successfully",
+      gig,
+      bid,
+    });
 
-    //  SOCKET EVENT
-    getIO().to(bid.freelancerId.toString()).emit("notification", notification);
-
-    res.json({ message: "Freelancer hired successfully", notification });
-  } catch (err) {
-    await session.abortTransaction();
-    res.status(400).json({ error: err.message });
-  } finally {
+  } catch (error) {
+    // ❗ abort ONLY if transaction is active
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     session.endSession();
+
+    console.error("HireBid Error:", error.message);
+    return res.status(400).json({ message: error.message });
   }
 };
