@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import useAuth from "../hooks/useAuth";
-import api from "../api/axios"; // axios instance
+import api from "../api/axios"; 
 
 export const SocketContext = createContext();
 
@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
   const fetchNotifications = async () => {
     if (!user) return;
     try {
-      const { data } = await api.get("/notifications"); // GET route: fetch user's notifications
+      const { data } = await api.get("/notifications"); 
       setNotifications(data);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
@@ -24,10 +24,10 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user) return;
 
-    // 🔹 Fetch offline notifications on mount
+    //  Fetch offline notifications on mount
     fetchNotifications();
 
-    // 🔹 Initialize socket connection
+    //  Initialize socket connection
     const newSocket = io("https://gigflowapplication.onrender.com", {
       path: "/socket.io",
       transports: ["polling", "websocket"],
@@ -39,26 +39,26 @@ export const SocketProvider = ({ children }) => {
 
     setSocket(newSocket);
 
-    // 🔹 On socket connect
+    //  On socket connect
     newSocket.on("connect", () => {
-      console.log("🟢 Socket connected (frontend):", newSocket.id);
+      console.log(" Socket connected (frontend):", newSocket.id);
       if (user?.id) newSocket.emit("join", user.id);
     });
 
-    // 🔹 On socket reconnect
+    //  On socket reconnect
     newSocket.on("reconnect", () => {
-      console.log("♻️ Socket reconnected (frontend):", newSocket.id);
+      console.log(" Socket reconnected (frontend):", newSocket.id);
       if (user?.id) newSocket.emit("join", user.id);
     });
 
-    // 🔹 Receive realtime notifications
+    //  Receive realtime notifications
     newSocket.on("notification", (data) => {
       setNotifications((prev) => [data, ...prev]);
     });
 
-    // 🔹 Disconnect & error handling
+    //  Disconnect & error handling
     newSocket.on("disconnect", () => {
-      console.log("🔴 Socket disconnected (frontend)");
+      console.log(" Socket disconnected (frontend)");
     });
 
     newSocket.on("connect_error", (err) => {
@@ -77,7 +77,7 @@ export const SocketProvider = ({ children }) => {
       prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
     );
     try {
-      await api.patch(`/notifications/${id}/read`); // mark as read in DB
+      await api.patch(`/notifications/${id}/read`); 
     } catch (error) {
       console.error("Failed to mark notification as read:", error.message);
     }

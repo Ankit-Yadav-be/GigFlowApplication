@@ -13,25 +13,25 @@ export const initSocket = (server) => {
       methods: ["GET", "POST"],
       credentials: true,
     },
-    transports: ["polling", "websocket"], // 🔥 Render fix
+    transports: ["polling", "websocket"], 
   });
 
   io.on("connection", (socket) => {
-    console.log("🟢 New socket connected:", socket.id);
+    console.log(" New socket connected:", socket.id);
 
     // join user-specific room
     socket.on("join", (userId) => {
       if (!userId) return;
       socket.join(userId);
-      console.log(`👤 User ${userId} joined room`);
+      console.log(` User ${userId} joined room`);
     });
 
     socket.on("disconnect", () => {
-      console.log("🔴 Socket disconnected:", socket.id);
+      console.log(" Socket disconnected:", socket.id);
     });
   });
 
-  // Debug helper (optional but useful)
+  
   io.engine.on("connection_error", (err) => {
     console.error("Socket connection error:", err.message);
   });

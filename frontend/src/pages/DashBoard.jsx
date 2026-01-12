@@ -8,7 +8,7 @@ import { FiBell, FiSearch, FiLogOut, FiPlus } from "react-icons/fi";
 
 const Dashboard = () => {
   const [gigs, setGigs] = useState([]);
-  const [filter, setFilter] = useState("all"); 
+  const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const { logout, user } = useAuth();
   const navigate = useNavigate();
@@ -109,8 +109,8 @@ const Dashboard = () => {
                       <div
                         key={n._id}
                         className={`p-3 mb-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-700 ${!n.isRead
-                            ? "bg-gray-700 border-l-4 border-green-400"
-                            : ""
+                          ? "bg-gray-700 border-l-4 border-green-400"
+                          : ""
                           }`}
                         onClick={() => markAsRead(n._id)}
                       >
@@ -141,8 +141,8 @@ const Dashboard = () => {
         <button
           onClick={() => setFilter("all")}
           className={`px-6 py-2 rounded-2xl font-semibold transition ${filter === "all"
-              ? "bg-green-500 text-white shadow-lg"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            ? "bg-green-500 text-white shadow-lg"
+            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
         >
           All Gigs
@@ -150,8 +150,8 @@ const Dashboard = () => {
         <button
           onClick={() => setFilter("my")}
           className={`px-6 py-2 rounded-2xl font-semibold transition ${filter === "my"
-              ? "bg-green-500 text-white shadow-lg"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            ? "bg-green-500 text-white shadow-lg"
+            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
         >
           My Gigs

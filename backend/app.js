@@ -9,10 +9,10 @@ import notificationRoutes from "./src/routes/notificationRoutes.js";
 
 const app = express();
 
-/* DB */
+
 connectDB();
 
-/* CORS */
+
 app.use(
   cors({
     origin: [
@@ -25,12 +25,12 @@ app.use(
   })
 );
 
-/* IMPORTANT */
+
 app.use(express.json());
 
-/* ROUTES */
+
 app.get("/", (req, res) => {
-  res.send("API running 🚀");
+  res.send("API running successfully");
 });
 
 app.use("/api/auth", authRoutes);

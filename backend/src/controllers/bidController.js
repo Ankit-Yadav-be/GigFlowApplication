@@ -4,12 +4,12 @@ import Gig from "../models/gigModal.js";
 import { getIO } from "../config/socket.js";
 import Notification from "../models/notificationModal.js";
 
-/* ---------------- CREATE BID ---------------- */
+
 export const createBid = async (req, res) => {
   try {
     const bid = await Bid.create({
       ...req.body,
-      freelancerId: req.user._id, // 🔹 Use freelancerId
+      freelancerId: req.user._id,
     });
 
     res.status(201).json(bid);
@@ -19,7 +19,7 @@ export const createBid = async (req, res) => {
   }
 };
 
-/* ---------------- GET BIDS BY GIG ---------------- */
+
 export const getBidsByGig = async (req, res) => {
   try {
     const bids = await Bid.find({ gigId: req.params.gigId });
@@ -30,7 +30,7 @@ export const getBidsByGig = async (req, res) => {
   }
 };
 
-/* ---------------- HIRE BID (ATOMIC) ---------------- */
+
 export const hireBid = async (req, res) => {
   const session = await mongoose.startSession();
 
@@ -68,16 +68,16 @@ export const hireBid = async (req, res) => {
     const io = getIO();
 
     const notificationData = {
-      type: "HIRED", // 🔹 Must match enum in Notification model
+      type: "HIRED", //  Must match enum in Notification model
       message: "🎉 Your bid has been hired!",
-      gig: gig._id,  // 🔹 Field matches Notification schema
+      gig: gig._id, //  Field matches Notification schema
       createdAt: new Date(),
     };
 
-    // 🔹 Emit realtime notification to online user
+    //  Emit realtime notification to online user
     io.to(bid.freelancerId.toString()).emit("notification", notificationData);
 
-    // 🔹 Persist notification to DB for offline users
+    //  Persist notification to DB for offline users
     await Notification.create({
       user: bid.freelancerId,
       ...notificationData,

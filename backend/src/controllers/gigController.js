@@ -11,16 +11,15 @@ export const createGig = async (req, res) => {
 export const getGigs = async (req, res) => {
   const { search, status } = req.query;
 
-  // Agar status query me diya hai to use filter karo, nahi to sab dikhao
+
   const query = {
-    ...(status ? { status } : {}), // agar status diya hai to filter
+    ...(status ? { status } : {}),
     ...(search && { title: { $regex: search, $options: "i" } }),
   };
 
   const gigs = await Gig.find(query);
   res.json(gigs);
 };
-
 
 export const getGigById = async (req, res) => {
   const gig = await Gig.findById(req.params.id);
