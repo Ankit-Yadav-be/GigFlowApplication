@@ -28,7 +28,7 @@ export const SocketProvider = ({ children }) => {
     fetchNotifications();
 
     //  Initialize socket connection
-    const newSocket = io("https://gigflowapplication.onrender.com", {
+    const newSocket = io("https://gig-flow-application.vercel.app", {
       path: "/socket.io",
       transports: ["polling", "websocket"],
       withCredentials: true,

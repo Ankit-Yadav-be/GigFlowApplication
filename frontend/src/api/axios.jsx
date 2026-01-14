@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://gigflowapplication.onrender.com/api",
+  baseURL: "https://gig-flow-application.vercel.app/api",
   withCredentials: true,
 });
 
